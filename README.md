@@ -14,6 +14,8 @@ zig build
 sudo ./zig-out/bin/main
 ```
 
+![example](images/example.png)
+
 ## Caveats
 
 * I only tested it on x86-64 linux machines.  
