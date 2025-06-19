@@ -10,13 +10,16 @@ const contains = utils.contains;
 
 // based on kernel code, found at:
 // https://sites.uclouvain.be/SystInfo/usr/include/linux/input.h.html:
+// https://elixir.bootlin.com/linux/v6.14/source/include/uapi/linux/input.h:
 const EV_IOC_GNAME = 0x06;
 const EV_IOC_GBITS_BASE = 0x20;
+// https://elixir.bootlin.com/linux/v6.14/source/include/uapi/linux/input-event-codes.h:
 const EV_MAX = 0x1f;
-const IOC_INPUT_TYPE = 'E';
 const EV_KEY_INDEX = 0x01;
 const EV_MISC_INDEX = 0x04;
 const KEY_MAX = 0x2ff;
+// https://www.kernel.org/doc/Documentation/ioctl/ioctl-number.txt:
+const IOC_INPUT_TYPE = 'E';
 
 pub fn display_keyboard_device(device : std.fs.File) void {
     var res : [256]u8 = undefined;
