@@ -13,6 +13,18 @@ compile and run:
 zig build
 sudo ./zig-out/bin/main
 ```
+help message:
+```txt
+usage: ./zig-out/bin/main [-d <device_path>] [-v[v]] [-h]
+
+      -d, --device           path to input device file (usually in the format: '/dev/input/eventX', 'X' being a number)
+      -v, --verbose          be verbose
+      -vv, --very-verbose    be very verbose (print a lot more of debug data)
+      -h, --help             display this help message
+
+```
+
+## Example
 
 ![example](images/example.png)
 
@@ -24,7 +36,7 @@ sudo ./zig-out/bin/main
 * The program does not resolve the keypress to it's charcter output.  
 
 ## TODOS?
-[ ] Add command line arguments.  
-[ ] Add check for running privileges.  
-[ ] Add translation from keypress to charcter.  
-[ ] Add support for multiple keyboards.  
+- [X] Add command line arguments.  
+- [ ] Add check for running privileges.  
+- [ ] Add translation from keypress to charcter.  
+- [ ] Add support for multiple keyboards.  
