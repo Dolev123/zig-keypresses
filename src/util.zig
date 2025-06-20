@@ -2,7 +2,11 @@ const std = @import("std");
 const stdout = std.io.getStdOut().writer();
 const stderr = std.io.getStdErr().writer();
 
-const verbose = 0;
+var verbose : usize = 0;
+
+pub fn set_verbose(v: usize) void {
+    verbose = v;
+}
 
 pub fn debug2(comptime format: []const u8, args: anytype) void {
     if (verbose < 2) return;

@@ -12,6 +12,10 @@ const info = utils.info;
 const error_ = utils.error_;
 const contains = utils.contains;
 
+// Cli
+const cli = @import("cli.zig");
+
+// Keys
 const KEY_EVENTS = @import("keys.zig").KEY_EVENTS;
 const EVENT_TYPES = @import("keys.zig").EVENT_TYPES;
 const KEYS = @import("keys.zig").KEYS;
@@ -21,7 +25,7 @@ const ioctls = @import("ioctls.zig");
 const BY_PATH_DIR = "/dev/input/by-path";
 
 // Allocators
-const MEM_SIZE : comptime_int = 1024*8;//65536;
+const MEM_SIZE : comptime_int = 1024*8; // 8 KB
 var mem_buf : [MEM_SIZE:0]u8 = undefined;
 
 // Errors
@@ -42,6 +46,7 @@ const InputEvent = packed struct {
 
 // Program
 fn find_keyboard_device(allocator : Allocator) ![]const u8 {
+    info("Getting Keyboard Device", .{});
     debug("Searching keyboard device in: {s}", .{BY_PATH_DIR});
     const dir : std.fs.Dir = try std.fs.openDirAbsolute(BY_PATH_DIR, std.fs.Dir.OpenOptions{ .iterate = true, .no_follow = true });
     var walker = try dir.walk(allocator);
@@ -90,7 +95,7 @@ fn loop_over_keyboard(device_path: []const u8) !void {
         _ = try std.posix.poll(poll_fds[0..], -1);
         debug2("Readin device", .{});
         _ = try device.read(&buffer);
-        debug("Read event: {} bytes", .{buffer.len});
+        debug2("Read event: {} bytes", .{buffer.len});
         var event : InputEvent = undefined; 
         event = std.mem.bytesToValue(InputEvent, &buffer);
 
@@ -118,13 +123,24 @@ pub fn main() !void {
     var fba = std.heap.FixedBufferAllocator.init(&mem_buf);
     const allocator = fba.allocator();
 
-    info("Getting Keyboard Device", .{});
-    const device_path = find_keyboard_device(allocator) catch |err| { switch (err) {
-        ProgramError.NoKeboardSymlinkFound => error_("Failed to find keyboard symlink", .{}),
-        else => error_("{}", .{err}),
-    } return; };
+    try cli.parse_command_line(allocator);
+    defer cli.free();
+    cli.print_arguments();
+    
+    // try to get from command line, otherwise search for one
+    const device_path = if (cli.arguments.device_path.len > 0) 
+                    cli.arguments.device_path
+                else find_keyboard_device(allocator) catch |err| {
+                    switch (err) {
+                        ProgramError.NoKeboardSymlinkFound => error_("Failed to find keyboard symlink", .{}),
+                        else => error_("{}", .{err}),
+                    } 
+                    return; 
+                }; 
+
     info("Keyboard Device Path: '{s}'", .{device_path});
     loop_over_keyboard(device_path) catch |err| switch (err) {
         else => error_("{}", .{err}),
     }; return;
 }
+
