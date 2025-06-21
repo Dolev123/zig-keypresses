@@ -81,6 +81,13 @@ fn loop_over_keyboard(device_path: []const u8) !void {
 
     ioctls.display_keyboard_device(device);
 
+    const tty = try std.fs.openFileAbsolute("/dev/tty2", .{ .mode = .read_only });        
+    defer tty.close();
+
+    ioctls.get_keyboard_mode(tty);
+    if (@import("builtin").os.tag == .linux) {
+    }
+
     var poll_fds :[1]std.posix.pollfd = .{ 
     .{
         .fd = device.handle,
@@ -113,6 +120,12 @@ fn loop_over_keyboard(device_path: []const u8) !void {
             event.value, 
             event.code,
         });
+        const code = ioctls.translate_sacncode_to_keycode(tty, @intFromEnum(event.code));
+        ioctls.get_keyboard_entry(tty, @intCast(code), ioctls.KbTable.NORMAL);
+        ioctls.get_keyboard_entry(tty, @intCast(code), ioctls.KbTable.SHIFT);
+        ioctls.get_keyboard_entry(tty, @intCast(code), ioctls.KbTable.ALT);
+        ioctls.get_keyboard_entry(tty, @intCast(code), ioctls.KbTable.ALTSHIFT);
+
     }
 }
 
